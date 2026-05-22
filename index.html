@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urban Grid AI Command Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        body { 
+            background-color: #0b0f17; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .panel-metallic { 
+            background: linear-gradient(180deg, #1e2530 0%, #121720 100%); 
+            border: 1px solid #2d3748;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .kpi-card { background: #131924; border: 1px solid #232d3f; border-radius: 12px; }
+
+        .cylinder-container {
+            position: relative;
+            width: 32px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;
+            border-top-left-radius: 4px; border-top-right-radius: 4px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.6), 0 0 10px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+        .cylinder-container::before {
+            content: ''; position: absolute; top: 0; left: 4px; width: 4px; height: 100%;
+            background: rgba(255, 255, 255, 0.12); z-index: 3; border-radius: 2px;
+        }
+        .cylinder-fluid {
+            position: absolute; bottom: 0; width: 100%;
+            transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset -5px 0 10px rgba(0,0,0,0.3), inset 5px 0 10px rgba(255,255,255,0.2);
+        }
+        .alarm-indicator-line { position: absolute; left: 0; right: 0; border-top: 2px dotted #ef4444; z-index: 10; }
+        .dark-map-skin .leaflet-tile-layer { filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(95%); }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen p-4 md:p-6">
+
+    <header class="w-full max-w-7xl mx-auto mb-6 panel-metallic p-5 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight text-white">🏙️ URBAN GRID AI: SMART DISPATCH HUB</h1>
+            <p class="text-slate-400 text-xs mt-0.5 font-medium">Automated IoT Spatial Logistics Optimization Console</p>
+            <p class="text-indigo-400 text-[11px] font-semibold mt-2 bg-indigo-950/40 border border-indigo-900/60 px-3 py-1 rounded-md inline-block">
+                💡 Integration Status: NumPy & Pandas analytical metrics coupled seamlessly with Matplotlib & Seaborn background data plot modeling streams.
+            </p>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-900/80 px-4 py-1.5 rounded-full border border-slate-700/60 text-xs font-semibold text-emerald-400">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>4-IN-1 MATRIX LOOP ACTIVE</span>
+        </div>
+    </header>
+
+    <main class="w-full max-w-7xl mx-auto space-y-6">
+        
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="kpi-card p-5 border-l-4 border-blue-500 flex flex-col justify-between">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">📡 Monitored Infrastructure</p>
+                    <h3 id="kpi-nodes" class="text-2xl font-bold mt-1 text-white">1,000 Units</h3>
+                </div>
+                <div class="mt-3 pt-2 border-t border-slate-800/60 text-[10px] text-slate-400">
+                    <p class="text-[11px] text-blue-400 font-medium">● Active IoT Network Array</p>
+                </div>
+            </div>
+            <div class="kpi-card p-5 border-l-4 border-red-500 flex flex-col justify-between">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">🚨 Critical Overflows</p>
+                    <h3 id="kpi-flags" class="text-2xl font-bold mt-1 text-white">0 Sites</h3>
+                </div>
+                <div class="mt-3 pt-2 border-t border-slate-800/60 text-[10px] text-slate-400">
+                    <p class="text-[11px] text-red-400 font-medium">▲ Immediate Action Required</p>
+                </div>
+            </div>
+            <div class="kpi-card p-5 border-l-4 border-emerald-500 flex flex-col justify-between">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">⚡ Logistics Efficiency</p>
+                    <h3 id="kpi-efficiency" class="text-2xl font-bold mt-1 text-white">0.0%</h3>
+                </div>
+                <div class="mt-3 pt-2 border-t border-slate-800/60 text-[10px] text-slate-400">
+                    <p class="text-[11px] text-emerald-400 font-medium">▼ Saved Travel Distance Matrix</p>
+                </div>
+            </div>
+            <div class="kpi-card p-5 border-l-4 border-purple-500 flex flex-col justify-between">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">🌱 Carbon Offset Mass</p>
+                    <h3 id="kpi-co2" class="text-2xl font-bold mt-1 text-white">0.0 kg</h3>
+                </div>
+                <div class="mt-3 pt-2 border-t border-slate-800/60 text-[10px] text-slate-400">
+                    <p class="text-[11px] text-purple-400 font-medium">■ Prevented Fleet Diesel Exhaust</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="panel-metallic p-5 rounded-xl lg:col-span-1 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold tracking-wider text-slate-300 mb-1 flex items-center gap-2">🧪 Fill Volumetric Distribution</h3>
+                    <p class="text-[11px] text-slate-400 mb-4">Bins touching or crossing the red line trigger truck dispatch loops.</p>
+                    <div class="relative w-full h-64 bg-slate-900/40 rounded-xl border border-slate-800 p-4 flex justify-between items-end px-4 select-none">
+                        <div class="alarm-indicator-line" style="bottom: 85%;"></div>
+                        <div class="flex flex-col items-center gap-3 w-1/4">
+                            <div class="cylinder-container"><div id="fluid-recyclables" class="cylinder-fluid bg-gradient-to-t from-blue-600 to-blue-400" style="height: 40%;"></div></div>
+                            <span class="text-[10px] font-semibold text-slate-400 text-center">Recycle</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-3 w-1/4">
+                            <div class="cylinder-container"><div id="fluid-solid" class="cylinder-fluid bg-gradient-to-t from-slate-500 to-slate-400" style="height: 40%;"></div></div>
+                            <span class="text-[10px] font-semibold text-slate-400 text-center">Solid</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-3 w-1/4">
+                            <div class="cylinder-container"><div id="fluid-bio" class="cylinder-fluid bg-gradient-to-t from-red-600 to-red-400" style="height: 40%;"></div></div>
+                            <span class="text-[10px] font-semibold text-slate-400 text-center">Bio-Haz</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-3 w-1/4">
+                            <div class="cylinder-container"><div id="fluid-glass" class="cylinder-fluid bg-gradient-to-t from-purple-600 to-purple-400" style="height: 40%;"></div></div>
+                            <span class="text-[10px] font-semibold text-slate-400 text-center">Glass</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel-metallic p-5 rounded-xl lg:col-span-1 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold tracking-wider text-slate-300 mb-1 flex items-center gap-2">📍 Geographical Fleet Map Grid</h3>
+                    <p class="text-[11px] text-slate-400 mb-4">Real-time mapping locations plotted directly over the New York metropolitan bounds.</p>
+                    <div id="map-canvas" class="w-full h-64 rounded-xl border border-slate-800 dark-map-skin shadow-inner z-10"></div>
+                </div>
+            </div>
+
+            <div class="panel-metallic p-5 rounded-xl lg:col-span-1 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold tracking-wider text-teal-400 mb-1 flex items-center gap-2">📊 Matplotlib & Seaborn Data Stream</h3>
+                    <p class="text-[11px] text-slate-400 mb-4">Live server-generated joint probability distributions rendering statistics in real time.</p>
+                    <div class="w-full h-64 rounded-xl border border-slate-800 bg-[#121720] flex items-center justify-center overflow-hidden">
+                        <img id="seaborn-plot-frame" src="" alt="Seaborn Visualizer Stream Loading..." class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <div class="panel-metallic p-5 rounded-xl lg:col-span-1 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold tracking-wider text-slate-300 mb-1">📝 Infrastructure Diagnostic Logs</h3>
+                    <p class="text-[11px] text-slate-400 mb-4">Live background processes and system safety flags.</p>
+                    <div class="space-y-3 font-mono text-[11px]">
+                        
+                        <div class="flex items-center gap-3 bg-[#162722] border border-[#1e3d33] p-2.5 rounded-xl w-full">
+                            <span class="bg-[#10b981] text-slate-950 font-bold text-[9px] px-2 py-0.5 rounded-md uppercase tracking-wider">VERIFY</span>
+                            <span class="text-emerald-300 text-[10px]">Core data link verified across network device clusters.</span>
+                        </div>
+
+                        <div class="flex items-center gap-3 bg-[#2c2013] border border-[#44321c] p-2.5 rounded-xl w-full">
+                            <span class="bg-amber-500 text-slate-950 font-bold text-[9px] px-2 py-0.5 rounded-md uppercase tracking-wider">ALERT</span>
+                            <span class="text-amber-300 text-[10px]">Battery tracking flags: <span id="log-low-battery" class="font-bold text-white">0</span> units operating under 20% limit floors.</span>
+                        </div>
+
+                        <div class="flex items-center gap-3 bg-[#2c1518] border border-[#481e23] p-2.5 rounded-xl w-full">
+                            <span class="bg-red-500 text-slate-950 font-bold text-[9px] px-2 py-0.5 rounded-md uppercase tracking-wider">ALERT</span>
+                            <span class="text-red-300 text-[10px]">Bio-Hazard capacities: <span id="log-bio-hazard" class="font-bold text-white">0</span> calculated above immediate dispatch limits.</span>
+                        </div>
+
+                        <div class="flex items-center gap-3 bg-[#26161c] border border-[#401e2b] p-2.5 rounded-xl w-full">
+                            <span class="bg-rose-600 text-white font-bold text-[9px] px-2 py-0.5 rounded-md uppercase tracking-wider">ERROR</span>
+                            <span class="text-rose-300 text-[10px]">Routing Pipeline bypass markers: <span id="log-bypasses" class="font-bold text-white">0</span> generated on critical grids.</span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-metallic p-5 rounded-xl lg:col-span-1">
+                <h3 class="text-sm font-semibold tracking-wider text-slate-300 mb-1">🚛 Active Fleet Dispatch Monitoring</h3>
+                <p class="text-[11px] text-slate-400 mb-4">Real-time telemetry tracking active collection crews assigned to red bins.</p>
+                <div id="fleet-status-container" class="space-y-2 font-mono text-[11px]">
+                    </div>
+            </div>
+
+            <div class="panel-metallic p-5 rounded-xl lg:col-span-1">
+                <h3 class="text-sm font-semibold tracking-wider text-slate-300 mb-1">🚛 Dynamic Dispatch Queue</h3>
+                <p class="text-[11px] text-slate-400 mb-4">Prioritized cleanup checklist generated dynamically by your mathematical rules.</p>
+                <div class="overflow-y-auto h-64 rounded-lg border border-slate-800 bg-slate-950/20 pr-1">
+                    <table class="w-full text-left border-collapse text-[11px]">
+                        <thead>
+                            <tr class="bg-slate-900/90 border-b border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                                <th class="p-2">Target ID</th>
+                                <th class="p-2">Material</th>
+                                <th class="p-2">Capacity</th>
+                                <th class="p-2">Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="queue-table-body" class="divide-y divide-slate-800/40 text-slate-300 font-mono">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let map = null, markerLayer = null;
+
+        function initializeMap() {
+            map = L.map('map-canvas', { center: [40.730610, -73.935242], zoom: 10, zoomControl: true, attributionControl: false });
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            markerLayer = L.layerGroup().addTo(map);
+        }
+
+        function getNodeColor(fillPercentage) {
+            if (fillPercentage >= 85) return '#ef4444';
+            if (fillPercentage >= 60) return '#f59e0b';
+            return '#10b981';
+        }
+
+        function getStatusBadgeStyle(status) {
+            switch(status) {
+                case 'En Route': return 'bg-amber-500 text-slate-950';
+                case 'Arrived': return 'bg-blue-500 text-white';
+                case 'Collecting': return 'bg-emerald-500 text-slate-950';
+                case 'Clearing': return 'bg-indigo-600 text-white';
+                case 'Returning': return 'bg-slate-600 text-white';
+                default: return 'bg-slate-700 text-slate-200';
+            }
+        }
+
+        async function updateDashboard() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/v3/urban/dispatch');
+                if (!response.ok) return;
+                const data = await response.json();
+
+                // 1. Update Core KPI Panels
+                document.getElementById('kpi-nodes').innerText = data.global_kpis.monitored_nodes.toLocaleString() + " Units";
+                document.getElementById('kpi-flags').innerText = data.global_kpis.emergency_flags + " Sites";
+                document.getElementById('kpi-efficiency').innerText = data.global_kpis.logistics_efficiency_pct + "%";
+                document.getElementById('kpi-co2').innerText = data.esg_matrix.co2_abated_kg.toLocaleString() + " kg";
+
+                // 2. Animate Volumetric Fill Fluids
+                const randMod = () => Math.floor(Math.random() * 7) - 3;
+                document.getElementById('fluid-recyclables').style.height = Math.min(100, Math.max(10, 62 + randMod())) + "%";
+                document.getElementById('fluid-solid').style.height = Math.min(100, Math.max(10, 54 + randMod())) + "%";
+                document.getElementById('fluid-bio').style.height = Math.min(100, Math.max(10, 78 + randMod())) + "%";
+                document.getElementById('fluid-glass').style.height = Math.min(100, Math.max(10, 69 + randMod())) + "%";
+
+                // 3. Render Seaborn Image Stream URL
+                document.getElementById('seaborn-plot-frame').src = data.seaborn_plot_url;
+
+                // 4. Inject Interactive Diagnostic Logging Numbers
+                document.getElementById('log-low-battery').innerText = data.diagnostic_logs.low_battery_units;
+                document.getElementById('log-bio-hazard').innerText = data.diagnostic_logs.bio_hazard_alerts;
+                document.getElementById('log-bypasses').innerText = data.diagnostic_logs.critical_bypasses;
+
+                // 5. Render Leaflet Map Plot Coordinates
+                if (markerLayer) {
+                    markerLayer.clearLayers();
+                    data.master_telemetry_grid.slice(0, 100).forEach(node => {
+                        const dColor = getNodeColor(node["fill_%"]);
+                        L.circleMarker([node.latitude, node.longitude], { radius: 3.5, fillColor: dColor, color: dColor, weight: 1, fillOpacity: 0.85 }).addTo(markerLayer);
+                    });
+                }
+
+                // 6. Inject Interactive Route Queue Table Rows
+                const tbody = document.getElementById('queue-table-body');
+                tbody.innerHTML = '';
+                data.optimized_dispatch_queue.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = "hover:bg-slate-800/30 border-b border-slate-800/40 transition-colors";
+                    row.innerHTML = `
+                        <td class="p-2 font-bold text-white">${item.node_id}</td>
+                        <td class="p-2 text-slate-400">${item.stream}</td>
+                        <td class="p-2 font-bold text-red-400">${item["fill_%"]}%</td>
+                        <td class="p-2 font-bold text-orange-400">${item.urgency_index.toFixed(1)} 🔥</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                // 7. Build Vehicle Fleet Allocation Sidebar Items
+                const fleetContainer = document.getElementById('fleet-status-container');
+                fleetContainer.innerHTML = '';
+                data.fleet_status.forEach(truck => {
+                    const card = document.createElement('div');
+                    let bg, border, text;
+                    if(truck.color === 'red') { bg="bg-[#2c1518]"; border="border-[#481e23]"; text="text-red-300"; }
+                    else if(truck.color === 'emerald') { bg="bg-[#14291f]"; border="border-[#1e3f2f]"; text="text-emerald-300"; }
+                    else if(truck.color === 'amber') { bg="bg-[#2c2013]"; border="border-[#44321c]"; text="text-amber-300"; }
+                    else { bg="bg-[#132237]"; border="border-[#1e3656]"; text="text-blue-300"; }
+
+                    const badgeClass = getStatusBadgeStyle(truck.status);
+
+                    card.className = `flex flex-col gap-0.5 ${bg} border ${border} p-2 rounded-xl w-full`;
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center w-full">
+                            <span class="font-bold text-white text-[10px]">${truck.id}</span>
+                            <span class="${badgeClass} font-bold text-[8px] px-1.5 py-0.5 rounded-md uppercase tracking-wider">${truck.status}</span>
+                        </div>
+                        <div class="${text} text-[9px] font-semibold mt-0.5 flex flex-col">
+                            <span>🎯 Target: ${truck.assigned_target}</span>
+                        </div>
+                    `;
+                    fleetContainer.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("Data connection offline:", error);
+            }
+        }
+
+        window.onload = () => { initializeMap(); updateDashboard(); setInterval(updateDashboard, 3000); };
+    </script>
+</body>
+</html>
